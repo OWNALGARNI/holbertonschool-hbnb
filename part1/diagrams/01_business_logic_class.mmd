@@ -1,10 +1,10 @@
 classDiagram
   class User {
     - UUID id
-    - str first_name
-    - str last_name
-    - str email
-    - str password
+    - string first_name
+    - string last_name
+    - string email
+    - string password
     - bool is_admin
     - datetime created_at
     - datetime updated_at
@@ -15,8 +15,8 @@ classDiagram
 
   class Place {
     - UUID id
-    - str title
-    - str description
+    - string title
+    - string description
     - float price
     - float latitude
     - float longitude
@@ -31,7 +31,7 @@ classDiagram
   class Review {
     - UUID id
     - int rating
-    - str comment
+    - string comment
     - datetime created_at
     - datetime updated_at
     + create()
@@ -42,8 +42,8 @@ classDiagram
 
   class Amenity {
     - UUID id
-    - str name
-    - str description
+    - string name
+    - string description
     - datetime created_at
     - datetime updated_at
     + create()

@@ -1,0 +1,46 @@
+sequenceDiagram
+    actor User
+    participant API as Presentation API
+    participant BL as Business Logic
+    participant DB as Persistence Database
+    participant Email as ConfirmationEmail
+
+    opt User Registration
+        User->>API: Fill registration form
+        API->>BL: Submit user data
+        BL->>DB: Create user
+        DB-->>BL: OK
+        BL->>Email: Send welcome email
+        Email-->>User: Confirmation email
+        BL-->>API: Success
+        API-->>User: Welcome message
+    end
+
+    opt Place Creation
+        User->>API: Submit place data
+        Note over User, API: User must be authenticated
+        API->>BL: Create place
+        BL->>DB: Store place
+        DB-->>BL: OK
+        BL-->>API: Place created
+        API-->>User: Success message
+    end
+
+    opt Review Submission
+        User->>API: Submit review
+        Note over User, API: User must be authenticated
+        API->>BL: Create review
+        BL->>DB: Store review
+        DB-->>BL: OK
+        BL-->>API: Review linked
+        API-->>User: Success message
+    end
+
+    opt Fetch Places
+        User->>API: Search places
+        API->>BL: Apply filters
+        BL->>DB: Query places
+        DB-->>BL: Results
+        BL-->>API: Formatted data
+        API-->>User: Show places
+    end
