@@ -1,0 +1,60 @@
+classDiagram
+    direction TB
+
+    class Users["Users"]
+
+    namespace Presentation_Layer {
+        class UserInterface["User Interface"]
+        class API["API"]
+    }
+
+    namespace Business_Logic_Layer {
+        class Facade {
+            +ClientRequest()
+        }
+        class User_Biz["User"]
+        class Review_Biz["Review"]
+        class Place_Biz["Place"]
+        class Amenity_Biz["Amenity"]
+    }
+
+    namespace Data_Persistence_Layer {
+        class User_DB["User"]
+        class Place_DB["Place"]
+        class Review_DB["Review"]
+        class Amenity_DB["Amenity"]
+    }
+
+    Users ..> UserInterface
+    UserInterface ..> API
+    API ..> Facade : Request
+
+    Facade ..> User_Biz
+    Facade ..> Review_Biz
+    Facade ..> Place_Biz
+    Facade ..> Amenity_Biz
+
+    User_Biz ..> Review_Biz
+    Review_Biz ..> Place_Biz
+    Place_Biz ..> Amenity_Biz
+
+    User_Biz ..> User_DB
+    Place_Biz ..> Place_DB
+    Review_Biz ..> Review_DB
+    Amenity_Biz ..> Amenity_DB
+
+    style Users fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+
+    style UserInterface fill:#ffe6cc,stroke:#d79b00,stroke-width:2px
+    style API fill:#ffe6cc,stroke:#d79b00,stroke-width:2px
+
+    style Facade fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    style User_Biz fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    style Review_Biz fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    style Place_Biz fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+    style Amenity_Biz fill:#e1d5e7,stroke:#9673a6,stroke-width:2px
+
+    style User_DB fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style Place_DB fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style Review_DB fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px
+    style Amenity_DB fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px

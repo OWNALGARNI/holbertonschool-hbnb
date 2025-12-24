@@ -1,0 +1,13 @@
+sequenceDiagram
+    actor User
+    participant API as Presentation API
+    participant BL as Business Logic
+    participant DB as Persistence Database
+
+    User->>API: Submit search query
+    API->>BL: Submit search parameters (API call)
+    BL->>BL: Apply filters
+    BL->>DB: Query matching places
+    DB-->>BL: Return place data
+    BL-->>API: Results formatted for output
+    API-->>User: Show properties

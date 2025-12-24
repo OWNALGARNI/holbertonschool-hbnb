@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor User
+    participant API as Presentation API
+    participant BL as Business Logic
+    participant DB as Persistence Database
+    participant Email as ConfirmationEmail
+
+    User->>API: Fill out registration form
+    API->>BL: Submit user data (API call)
+    BL->>DB: Create user record
+    DB-->>BL: Confirm storage
+    BL->>Email: Trigger welcome email
+    Email-->>User: Send confirmation email
+    BL-->>API: Return success response
+    API-->>User: Show "Welcome" message
