@@ -1,5 +1,5 @@
 HBnB Evolution
-This repository contains the initial design and documentation artifacts for the HBnB Evolution project.
+This repository contains the initial design and documentation artifacts for the HBnB Evolution project..
 
 The focus of this repository is on system modeling and architectural planning using UML diagrams before moving into implementation phases.
 
