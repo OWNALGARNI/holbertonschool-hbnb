@@ -1,112 +1,249 @@
-# app/api/v1/reviews.py
+"""
+Module reviews.py
+------------------
+
+This module defines the RESTful API endpoints related to reviews in the
+application.
+It uses Flask-RESTx to structure the API namespace, models, and resources.
+
+Endpoints:
+    - POST /reviews/: Create a new review
+    - GET /reviews/: List all reviews
+    - GET /reviews/<review_id>: Get a specific review by ID
+    - PUT /reviews/<review_id>: Update a review
+    - DELETE /reviews/<review_id>: Delete a review
+    - GET /reviews/places/<place_id>/reviews: Get all reviews for a
+    specific place
+
+Dependencies:
+    - Flask
+    - Flask-RESTx
+    - app.services.facade (acts as a service layer abstraction)
+
+Author:
+    Your Name (or team/project name)
+
+"""
+from app.services import facade
 from flask import request
 from flask_restx import Namespace, Resource, fields
 
-from app.facade.hbnb_facade import HBnBFacade
+api = Namespace('reviews', description='Review operations')
 
-facade = HBnBFacade()
-
-api = Namespace("api/v1", description="HBnB API v1 - Reviews")
-
-# نموذج (Schema) للـ Review في RESTx (للتوثيق)
-review_model = api.model("Review", {
-    "id": fields.String(readOnly=True),
-    "text": fields.String(required=True),
-    "user_id": fields.String(required=True),
-    "place_id": fields.String(required=True),
-    "created_at": fields.String(readOnly=True),
-    "updated_at": fields.String(readOnly=True),
-})
-
-review_create_model = api.model("ReviewCreate", {
-    "text": fields.String(required=True),
-    "user_id": fields.String(required=True),
+# Define the review model for input validation and documentation
+review_model = api.model('Review', {
+    'text': fields.String(required=True, description='Text of the review'),
+    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
+    'user_id': fields.String(required=True, description='ID of the user'),
+    'place_id': fields.String(required=True, description='ID of the place')
 })
 
 
-def _not_json():
-    api.abort(400, "Not a JSON")
+@api.route('/')
+class ReviewList(Resource):
+    """
+    Handles HTTP requests for creating and retrieving reviews.
+
+    Methods:
+        post(): Create a new review and return its data.
+        get(): Retrieve a list of all existing reviews.
+    """
+    @api.expect(review_model)
+    @api.response(201, 'Review successfully created')
+    @api.response(400, 'Invalid input data')
+    def post(self):
+        """
+        Create a new review.
+
+        Expects:
+            JSON body matching the review_model schema.
+
+        Returns:
+            Tuple: A JSON object with the new review's data and HTTP 201
+            status code.
+
+        Responses:
+            201: Review successfully created.
+            400: Invalid input data.
+        """
+        review_data = api.payload
+        new_review = facade.create_review(review_data)
+        return {
+            'id': new_review.id,
+            'text': new_review.text,
+            'rating': new_review.rating,
+            'user_id': new_review.user_id,
+            'place_id': new_review.place_id,
+            'created_at': new_review.created_at.isoformat(),
+            'updated_at': new_review.updated_at.isoformat()
+        }, 201
+
+    @api.response(200, 'List of reviews retrieved successfully')
+    def get(self):
+        """
+        Retrieve all reviews.
+
+        Returns:
+            Tuple: A list of reviews and HTTP 200 status code.
+
+        Responses:
+            200: List of reviews retrieved successfully.
+        """
+        reviews = facade.get_all_reviews()
+        return [{
+            'id': review.id,
+            'text': review.text,
+            'rating': review.rating,
+            'user_id': review.user_id,
+            'place_id': review.place_id,
+            'created_at': review.created_at.isoformat(),
+            'updated_at': review.updated_at.isoformat()
+        }for review in reviews], 200
 
 
-def _missing(field):
-    api.abort(400, f"Missing {field}")
+@api.route('/<review_id>')
+class ReviewResource(Resource):
+    """
+    Handles operations on a single review resource by ID.
 
-
-@api.route("/places/<string:place_id>/reviews")
-class PlaceReviews(Resource):
-    def get(self, place_id):
-        # تحقق أن المكان موجود
-        place = facade.get_place(place_id)
-        if not place:
-            api.abort(404, "Place not found")
-
-        reviews = facade.get_reviews_by_place(place_id)
-        return [r.to_dict() for r in reviews], 200
-
-    @api.expect(review_create_model, validate=False)
-    def post(self, place_id):
-        # تحقق أن المكان موجود
-        place = facade.get_place(place_id)
-        if not place:
-            api.abort(404, "Place not found")
-
-        data = request.get_json(silent=True)
-        if data is None:
-            _not_json()
-
-        # تحقق من user_id و text
-        user_id = data.get("user_id")
-        text = data.get("text")
-
-        if not user_id:
-            _missing("user_id")
-        if text is None or (isinstance(text, str) and text.strip() == ""):
-            _missing("text")
-
-        # تحقق أن المستخدم موجود
-        user = facade.get_user(user_id)
-        if not user:
-            api.abort(404, "User not found")
-
-        # أنشئ review واربطه بالمكان
-        created = facade.create_review({
-            "user_id": user_id,
-            "place_id": place_id,
-            "text": text,
-        })
-        return created.to_dict(), 201
-
-
-@api.route("/reviews/<string:review_id>")
-class ReviewById(Resource):
+    Methods:
+        get(review_id): Retrieve a specific review.
+        put(review_id): Update a specific review.
+        delete(review_id): Delete a specific review.
+    """
+    @api.response(200, 'Review details retrieved successfully')
+    @api.response(404, 'Review not found')
     def get(self, review_id):
+        """
+        Get a review by its ID.
+
+        Args:
+            review_id (str): The ID of the review.
+
+        Returns:
+            Tuple: JSON representation of the review and HTTP 200 status,
+            or 404 if not found.
+
+        Responses:
+            200: Review found and returned.
+            404: Review not found.
+        """
         review = facade.get_review(review_id)
         if not review:
-            api.abort(404, "Review not found")
-        return review.to_dict(), 200
+            return {'error': 'Review not found'}, 404
+        return {
+            'id': review.id,
+            'text': review.text,
+            'rating': review.rating,
+            'user_id': review.user_id,
+            'place_id': review.place_id,
+            'created_at': review.created_at.isoformat(),
+            'updated_at': review.updated_at.isoformat()
+        }, 200
 
-    def delete(self, review_id):
-        ok = facade.delete_review(review_id)
-        if not ok:
-            api.abort(404, "Review not found")
-        return {}, 200
-
+    @api.expect(review_model)
+    @api.response(200, 'Review updated successfully')
+    @api.response(404, 'Review not found')
+    @api.response(400, 'Invalid input data')
     def put(self, review_id):
+        """
+        Update an existing review.
+
+        Args:
+            review_id (str): The ID of the review to update.
+
+        Expects:
+            JSON body with updated fields.
+
+        Returns:
+            Tuple: Updated review data and HTTP status.
+
+        Responses:
+            200: Review updated successfully.
+            400: Invalid input or update failed.
+            404: Review not found.
+        """
         review = facade.get_review(review_id)
         if not review:
-            api.abort(404, "Review not found")
+            return {'error': 'Review not found'}, 404
 
-        data = request.get_json(silent=True)
-        if data is None:
-            _not_json()
+        data = request.get_json()
+        update_review = facade.update_review(review_id, data)
 
-        # ممنوع تعديل هذه
-        forbidden = {"id", "user_id", "place_id", "created_at", "updated_at"}
-        clean = {k: v for k, v in data.items() if k not in forbidden}
+        if not update_review:
+            return {'error': 'Update failed'}, 400
 
-        # لو حاول يفرغ text
-        if "text" in clean and (clean["text"] is None or str(clean["text"]).strip() == ""):
-            _missing("text")
+        return {
+            'id': review.id,
+            'text': review.text,
+            'rating': review.rating,
+            'user_id': review.user_id,
+            'place_id': review.place_id,
+            'created_at': review.created_at.isoformat(),
+            'updated_at': review.updated_at.isoformat()
+        }
 
-        updated = facade.update_review(review_id, clean)
-        return updated.to_dict(), 200
+    @api.response(200, 'Review deleted successfully')
+    @api.response(404, 'Review not found')
+    def delete(self, review_id):
+        """
+        Delete a review by its ID.
+
+        Args:
+            review_id (str): The ID of the review to delete.
+
+        Returns:
+            Tuple: Confirmation message and HTTP 200 status or 404 if
+            not found.
+
+        Responses:
+            200: Review deleted successfully.
+            404: Review not found.
+        """
+        review = facade.delete_review(review_id)
+        if not review:
+            return {'error': 'Review not found'}, 404
+        facade.review_repo.delete(review_id)
+        return {'message': 'Review deleted successfully'}, 200
+
+
+@api.route('/places/<place_id>/reviews')
+class PlaceReviewList(Resource):
+    """
+    Handles retrieval of reviews related to a specific place.
+
+    Methods:
+        get(place_id): Retrieve all reviews for a given place.
+    """
+    @api.response(200, 'List of reviews for the place retrieved successfully')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """
+        Get all reviews for a specific place.
+
+        Args:
+            place_id (str): The ID of the place.
+
+        Returns:
+            Tuple: A list of reviews for the given place and HTTP 200
+            status code.
+
+        Responses:
+            200: List of reviews returned.
+            404: Place not found.
+        """
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        reviews = [review for review in facade.get_all_reviews()
+                   if review.place_id == place_id]
+        return [{
+            'id': review.id,
+            'text': review.text,
+            'rating': review.rating,
+            'user_id': review.user_id,
+            'place_id': review.place_id,
+            "created_at": review.created_at.isoformat(),
+            "updated_at": review.updated_at.isoformat()
+        } for review in reviews], 200
