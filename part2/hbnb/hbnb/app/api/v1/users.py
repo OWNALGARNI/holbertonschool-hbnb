@@ -1,103 +1,132 @@
+"""
+This module defines the RESTful routes for user-related operations such as:
+- Creating a new user
+- Listing all users
+- Retrieving a user by ID
+- Updating a user
+
+The endpoints are exposed under the '/users/' namespace using Flask-RESTx.
+"""
+
+from app.services import facade
 from flask import request
 from flask_restx import Namespace, Resource, fields
 
-from app.facade import facade
-from app.models.user import User
+api = Namespace('users', description='User operations')
 
-users_ns = Namespace("users", description="User operations")
-
-# ---------- Swagger Models ----------
-
-# For POST (create): email/password required
-user_input = users_ns.model(
-    "UserInput",
-    {
-        "email": fields.String(required=True, description="User email"),
-        "password": fields.String(required=True, description="User password"),
-        "first_name": fields.String(required=False, description="First name"),
-        "last_name": fields.String(required=False, description="Last name"),
-    },
-)
-
-# For PUT (update): all optional (partial update)
-user_update = users_ns.model(
-    "UserUpdate",
-    {
-        "email": fields.String(required=False, description="User email"),
-        "password": fields.String(required=False, description="User password"),
-        "first_name": fields.String(required=False, description="First name"),
-        "last_name": fields.String(required=False, description="Last name"),
-    },
-)
-
-# Output model (NO password)
-user_output = users_ns.model(
-    "UserOutput",
-    {
-        "id": fields.String(description="User id"),
-        "email": fields.String(description="User email"),
-        "first_name": fields.String(description="First name"),
-        "last_name": fields.String(description="Last name"),
-        "created_at": fields.String(description="Created at"),
-        "updated_at": fields.String(description="Updated at"),
-    },
-)
-
-# ---------- Routes ----------
+# Define the user model for input validation and documentation
+user_model = api.model('User', {
+    'first_name': fields.String(required=True,
+                                description='First name of the user'),
+    'last_name': fields.String(required=True,
+                               description='Last name of the user'),
+    'email': fields.String(required=True, description='Email of the user')
+})
 
 
-@users_ns.route("/ping")
-class UsersPing(Resource):
-    def get(self):
-        return {"message": "users namespace works"}, 200
-
-
-@users_ns.route("/")
-class UsersCollection(Resource):
-    @users_ns.expect(user_input)
-    @users_ns.marshal_with(user_output, code=201)
+@api.route('/')
+class UserList(Resource):
+    """Handles operations related to the collection of users."""
+    @api.expect(user_model)
+    @api.response(201, 'User successfully created')
+    @api.response(400, 'Email already registered')
+    @api.response(400, 'Invalid input data')
     def post(self):
-        payload = request.get_json() or {}
+        """Register a new user.
+
+        Returns:
+            tuple: A dictionary with the user's information and a 201 status
+            code if successful.
+            If the email is already registered, returns an error dictionary
+            and 400 status code.
+        """
+        user_data = api.payload or {}
+        required_fields = ['first_name', 'last_name', 'email']
+        for field in required_fields:
+            if field not in user_data:
+                return {'error': f'Missing required field: {field}'}, 400
+
+        existing_user = facade.get_user_by_email(user_data['email'])
+        if existing_user:
+            return {'error': 'Email already registered'}, 400
 
         try:
-            user = User(
-                email=payload.get("email"),
-                password=payload.get("password"),
-                first_name=payload.get("first_name"),
-                last_name=payload.get("last_name"),
-            )
-            facade.repo.add(user)
-            return user.to_dict(), 201
+            new_user = facade.create_user(user_data)
         except ValueError as e:
-            return {"error": str(e)}, 400
+            return {'error': str(e)}, 400
+        except Exception:
+            return {'error': 'Internal server error'}, 500
 
-    @users_ns.marshal_list_with(user_output, code=200)
+        return {'id': new_user.id, 'first_name': new_user.first_name,
+                'last_name': new_user.last_name, 'email': new_user.email}, 201
+
     def get(self):
-        users = facade.repo.list(User)
-        return [u.to_dict() for u in users], 200
+        """Retrieve a list of all registered users.
+
+        Returns:
+            tuple: A list of dictionaries representing users, and a 200
+            status code.
+        """
+        users = facade.get_all_user()
+        return [{
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email
+        } for user in users], 200
 
 
-@users_ns.route("/<string:user_id>")
-class UserItem(Resource):
-    @users_ns.marshal_with(user_output, code=200)
+@api.route('/<user_id>', methods=['GET', 'PUT'])
+class UserResource(Resource):
+    """Handles operations related to a specific user identified by user ID."""
+
+    @api.response(200, 'User details retrieved successfully')
+    @api.response(404, 'User not found')
     def get(self, user_id):
-        user = facade.repo.get(User, user_id)
-        if not user:
-            return {"error": "User not found"}, 404
-        return user.to_dict(), 200
+        """Get user details by ID.
 
-    @users_ns.expect(user_update)
-    @users_ns.marshal_with(user_output, code=200)
+        Args:
+            user_id (str): The unique identifier of the user.
+
+        Returns:
+            tuple: A dictionary with user information and a 200 status code
+            if found.
+            If not found, returns an error dictionary and 404 status code.
+        """
+        user = facade.get_user(user_id)
+        if not user:
+            return {'error': 'User not found'}, 404
+        return {'id': user.id, 'first_name': user.first_name,
+                'last_name': user.last_name, 'email': user.email}, 200
+
+    @api.expect(user_model, validate=True)
+    @api.response(200, 'Successfully update')
+    @api.response(400, 'Invalid input data')
     def put(self, user_id):
-        user = facade.repo.get(User, user_id)
+        """Update user information.
+
+        Args:
+            user_id (str): The unique identifier of the user.
+
+        Returns:
+            tuple: A dictionary with updated user data and a 200 status code
+            if successful.
+            If the user is not found or update fails, returns an error
+            dictionary.
+        """
+        user = facade.get_user(user_id,)
         if not user:
-            return {"error": "User not found"}, 404
+            return {'error': 'User not found'}, 404
 
-        payload = request.get_json() or {}
+        data = request.get_json()
+        updated_user = facade.put_user(user_id, data)
 
-        try:
-            user.update(payload)      # validates email/password if provided
-            facade.repo.add(user)     # re-save
-            return user.to_dict(), 200
-        except ValueError as e:
-            return {"error": str(e)}, 400
+        if not updated_user:
+            return {'error': 'Update failed'}, 400
+
+        return {
+            'id': updated_user.id,
+            'first_name': updated_user.first_name,
+            'last_name': updated_user.last_name,
+            'email': updated_user.email
+        }
