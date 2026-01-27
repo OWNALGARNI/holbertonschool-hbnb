@@ -11,6 +11,7 @@ class User(BaseModel):
         password: str,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
+        is_admin: bool = False,
     ) -> None:
         super().__init__()
 
@@ -18,6 +19,7 @@ class User(BaseModel):
         self.password = self._validate_password(password)
         self.first_name = first_name or ""
         self.last_name = last_name or ""
+        self.is_admin = is_admin
 
     def _validate_email(self, email: str) -> str:
         if not email or not isinstance(email, str):
