@@ -11,6 +11,7 @@ The endpoints are exposed under the '/users/' namespace using Flask-RESTx.
 from app.services import facade
 from flask import request
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('users', description='User operations')
 
@@ -20,13 +21,15 @@ user_model = api.model('User', {
                                 description='First name of the user'),
     'last_name': fields.String(required=True,
                                description='Last name of the user'),
-    'email': fields.String(required=True, description='Email of the user')
+    'email': fields.String(required=True, description='Email of the user'),
+    'password': fields.String(required=True, description='Password of the user')
 })
 
 
 @api.route('/')
 class UserList(Resource):
     """Handles operations related to the collection of users."""
+    
     @api.expect(user_model)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
@@ -41,7 +44,7 @@ class UserList(Resource):
             and 400 status code.
         """
         user_data = api.payload or {}
-        required_fields = ['first_name', 'last_name', 'email']
+        required_fields = ['first_name', 'last_name', 'email', 'password']
         for field in required_fields:
             if field not in user_data:
                 return {'error': f'Missing required field: {field}'}, 400
@@ -60,14 +63,17 @@ class UserList(Resource):
         return {'id': new_user.id, 'first_name': new_user.first_name,
                 'last_name': new_user.last_name, 'email': new_user.email}, 201
 
+    @jwt_required()
     def get(self):
         """Retrieve a list of all registered users.
+        
+        Requires JWT token for authentication.
 
         Returns:
             tuple: A list of dictionaries representing users, and a 200
             status code.
         """
-        users = facade.get_all_user()
+        users = facade.get_all_users()
         return [{
             'id': user.id,
             'first_name': user.first_name,
@@ -76,14 +82,17 @@ class UserList(Resource):
         } for user in users], 200
 
 
-@api.route('/<user_id>', methods=['GET', 'PUT'])
+@api.route('/<user_id>')
 class UserResource(Resource):
     """Handles operations related to a specific user identified by user ID."""
 
+    @jwt_required()
     @api.response(200, 'User details retrieved successfully')
     @api.response(404, 'User not found')
     def get(self, user_id):
         """Get user details by ID.
+        
+        Requires JWT token for authentication.
 
         Args:
             user_id (str): The unique identifier of the user.
@@ -99,11 +108,14 @@ class UserResource(Resource):
         return {'id': user.id, 'first_name': user.first_name,
                 'last_name': user.last_name, 'email': user.email}, 200
 
+    @jwt_required()
     @api.expect(user_model, validate=True)
     @api.response(200, 'Successfully update')
     @api.response(400, 'Invalid input data')
     def put(self, user_id):
         """Update user information.
+        
+        Requires JWT token for authentication.
 
         Args:
             user_id (str): The unique identifier of the user.
@@ -114,12 +126,14 @@ class UserResource(Resource):
             If the user is not found or update fails, returns an error
             dictionary.
         """
-        user = facade.get_user(user_id,)
+        current_user_id = get_jwt_identity()
+        
+        user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
 
         data = request.get_json()
-        updated_user = facade.put_user(user_id, data)
+        updated_user = facade.update_user(user_id, data)
 
         if not updated_user:
             return {'error': 'Update failed'}, 400
