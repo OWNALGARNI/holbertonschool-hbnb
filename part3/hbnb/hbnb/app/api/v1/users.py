@@ -112,10 +112,13 @@ class UserResource(Resource):
     @api.expect(user_model, validate=True)
     @api.response(200, 'Successfully update')
     @api.response(400, 'Invalid input data')
+    @api.response(403, 'Unauthorized action')
     def put(self, user_id):
         """Update user information.
         
         Requires JWT token for authentication.
+        Users can only update their own information.
+        Email and password cannot be updated through this endpoint.
 
         Args:
             user_id (str): The unique identifier of the user.
@@ -128,11 +131,20 @@ class UserResource(Resource):
         """
         current_user_id = get_jwt_identity()
         
+        # Check if user is updating their own profile
+        if current_user_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+        
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
 
         data = request.get_json()
+        
+        # Prevent updating email and password
+        data.pop('email', None)
+        data.pop('password', None)
+        
         updated_user = facade.update_user(user_id, data)
 
         if not updated_user:
@@ -143,4 +155,4 @@ class UserResource(Resource):
             'first_name': updated_user.first_name,
             'last_name': updated_user.last_name,
             'email': updated_user.email
-        }
+        }, 200
