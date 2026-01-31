@@ -1,8 +1,7 @@
-from app.extensions import db
-from app.models.place import Place
-from app.repositories.sqlalchemy_repository import SQLAlchemyRepository
+from part3.repositories.base_repository import BaseRepository
+from part3.models.place import Place
 
 
-class PlaceRepository(SQLAlchemyRepository):
-    def __init__(self, session=None) -> None:
-        super().__init__(Place, session=session or db.session)
+class PlaceRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(Place)
