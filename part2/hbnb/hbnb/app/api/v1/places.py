@@ -50,6 +50,22 @@ review_model = api.model('PlaceReview', {
 # Define the place model for input validation and documentation
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Title of the place'),
+
+api_owner_model = api.model('Owner', {
+    'id': fields.String,
+    'first_name': fields.String,
+    'last_name': fields.String,
+    'email': fields.String,
+})
+api_amenity_model = api.model('AmenityDetail', {
+    'id': fields.String,
+    'name': fields.String,
+    'description': fields.String,
+})
+place_detail_model = api.inherit('PlaceDetail', place_model, {
+    'owner': fields.Nested(api_owner_model),
+    'amenities': fields.List(fields.Nested(api_amenity_model)),
+})
     'description': fields.String(description='Description of the place'),
     'price': fields.Float(required=True, description='Price per night'),
     'latitude': fields.Float(
