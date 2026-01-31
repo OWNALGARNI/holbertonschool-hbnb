@@ -1,4 +1,4 @@
--- Drop database if exists (اختياري للتجربة)
+
 DROP DATABASE IF EXISTS hbnb_dev_db;
 
 -- Create database
