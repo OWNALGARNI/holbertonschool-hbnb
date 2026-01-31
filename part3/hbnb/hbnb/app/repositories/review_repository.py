@@ -1,8 +1,7 @@
-from app.extensions import db
-from app.models.review import Review
-from app.repositories.sqlalchemy_repository import SQLAlchemyRepository
+from part3.repositories.base_repository import BaseRepository
+from part3.models.review import Review
 
 
-class ReviewRepository(SQLAlchemyRepository):
-    def __init__(self, session=None) -> None:
-        super().__init__(Review, session=session or db.session)
+class ReviewRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(Review)
