@@ -1,4 +1,4 @@
-erDiagram
+Diagram
 
     USERS {
         VARCHAR id PK
