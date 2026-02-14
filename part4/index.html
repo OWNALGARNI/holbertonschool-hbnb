@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBnB | Places</title>
+  <link rel="icon" href="images/icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a href="index.html" class="logo-link">
+      <img src="images/logo.png" alt="HBnB logo" class="logo" />
+    </a>
+
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="login.html" class="nav-link">Login</a>
+    </nav>
+
+    <a href="login.html" class="login-button" id="header-login">Login</a>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <h1 class="page-title">Places</h1>
+
+      <div class="filter">
+        <label class="form-label" for="country-filter">Filter by country</label>
+        <select class="form-input" id="country-filter" name="country-filter">
+          <option value="all">All</option>
+          <!-- options will be added later by JS -->
+        </select>
+      </div>
+    </section>
+
+    <section class="grid" id="places-list" aria-label="Places list">
+      <!-- place cards will be injected later by JS -->
+      <article class="place-card">
+        <h2 class="place-title">Sample Place</h2>
+        <p class="place-price">$120 / night</p>
+        <a class="details-button" href="place.html?id=sample">View Details</a>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>All rights reserved.</p>
+  </footer>
+</body>
+</html>
