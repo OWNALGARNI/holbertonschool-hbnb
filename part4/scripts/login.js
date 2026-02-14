@@ -29,9 +29,13 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json().catch(() => ({}));
+    
+    // طباعة التفاصيل للتشخيص
+    console.log("LOGIN STATUS:", res.status);
+    console.log("LOGIN RESPONSE:", JSON.stringify(data, null, 2));
 
     if (!res.ok) {
-      showMessage(data.message || "Login failed. Check your credentials.");
+      showMessage(data.message || data.error || "Login failed. Check your credentials.");
       return;
     }
 
