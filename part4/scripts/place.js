@@ -1,5 +1,5 @@
 import { API_BASE } from "./config.js";
-import { getToken } from "./auth.js";
+import { getToken, logout } from "./auth.js";
 
 const placeNameEl = document.getElementById("place-name");
 const hostEl = document.getElementById("place-host");
@@ -8,10 +8,29 @@ const descEl = document.getElementById("place-description");
 const amenitiesEl = document.getElementById("place-amenities");
 const reviewsEl = document.getElementById("reviews-list");
 const addReviewLink = document.getElementById("add-review-link");
+const loginButton = document.getElementById("header-login");
 
 function getPlaceId() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id");
+}
+
+function checkAuthentication() {
+  const token = getToken();
+  
+  if (token) {
+    // User is authenticated - change button to Logout
+    loginButton.textContent = "Logout";
+    loginButton.href = "#";
+    loginButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+  } else {
+    // User is not authenticated - show Login
+    loginButton.textContent = "Login";
+    loginButton.href = "login.html";
+  }
 }
 
 function setAddReviewLink(placeId) {
@@ -82,6 +101,7 @@ async function loadPlace() {
     return;
   }
 
+  checkAuthentication();
   setAddReviewLink(placeId);
 
   // جلب تفاصيل المكان

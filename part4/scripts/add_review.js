@@ -8,7 +8,7 @@ import { getToken, requireAuth, logout } from "./auth.js";
  */
 function getPlaceIdFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return params.get("place_id");
+  return params.get("id");
 }
 
 /**
@@ -106,7 +106,7 @@ async function handleReviewSubmit(event) {
     clearForm();
 
     setTimeout(() => {
-      window.location.href = `place.html?place_id=${encodeURIComponent(placeId)}`;
+      window.location.href = `place.html?id=${encodeURIComponent(placeId)}`;
     }, 1200);
   } catch (err) {
     displayMessage(`Error: ${err.message}`, true);
