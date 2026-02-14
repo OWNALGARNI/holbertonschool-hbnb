@@ -43,7 +43,7 @@ async function fetchPlaces() {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${API_BASE}/places`, { headers });
+    const res = await fetch(`${API_BASE}/places/`, { headers });
 
     const data = await res.json().catch(() => []);
     if (!res.ok) {

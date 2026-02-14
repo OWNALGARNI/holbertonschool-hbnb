@@ -106,7 +106,7 @@ async function loadPlace() {
 
   // جلب تفاصيل المكان
   const { res: placeRes, data: place } = await fetchJSON(
-    `${API_BASE}/places/${encodeURIComponent(placeId)}`,
+    `${API_BASE}/places/${encodeURIComponent(placeId)}/`,
     {
       headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
     }
@@ -138,7 +138,7 @@ async function loadPlace() {
 
   if (!reviews) {
     const { res: revRes, data: revData } = await fetchJSON(
-      `${API_BASE}/places/${encodeURIComponent(placeId)}/reviews`,
+      `${API_BASE}/places/${encodeURIComponent(placeId)}/reviews/`,
       {
         headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
       }
