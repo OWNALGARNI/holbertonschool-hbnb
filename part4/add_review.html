@@ -1,79 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Review</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBnB | Add Review</title>
+  <link rel="icon" href="images/icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-    <!-- (اختياري) اربط CSS لو عندكم -->
-    <!-- <link rel="stylesheet" href="./styles/style.css" /> -->
-  </head>
+<body>
+  <header class="site-header">
+    <a href="index.html" class="logo-link">
+      <img src="images/logo.png" alt="HBnB logo" class="logo" />
+    </a>
 
-  <body>
-    <!-- Header (اختياري/حسب مشروعك) -->
-    <header style="display:flex; justify-content:space-between; align-items:center; padding:16px;">
-      <a href="index.html" style="text-decoration:none;">
-        <strong>HBnB</strong>
-      </a>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="login.html" class="nav-link">Login</a>
+    </nav>
 
-      <!-- زر تسجيل الدخول/الخروج: add_review.js بيحوّله لـ Logout إذا فيه token -->
-      <a id="header-login" href="login.html">Login</a>
-    </header>
+    <a href="login.html" class="login-button" id="header-login">Login</a>
+  </header>
 
-    <main style="max-width:700px; margin:0 auto; padding:16px;">
-      <h1 style="margin-bottom:8px;">Add a Review</h1>
-      <p style="margin-top:0; opacity:0.8;">
+  <main class="container">
+    <section class="add-review card">
+      <h1 class="page-title">Add a Review</h1>
+      <p style="margin-top: 0; color: var(--muted);">
         Please write your review and choose a rating (1 to 5).
       </p>
 
-      <!-- رسالة نجاح/خطأ -->
-      <p id="review-message" style="display:none; margin: 12px 0; font-weight: 600;"></p>
+      <p class="form-message" id="review-message" aria-live="polite"></p>
 
-      <!-- Review Form -->
-      <form id="review-form" style="display:flex; flex-direction:column; gap:12px;">
-        <div style="display:flex; flex-direction:column; gap:6px;">
-          <label for="comment">Comment</label>
-          <textarea
-            id="comment"
-            name="comment"
-            rows="5"
-            placeholder="Write your review..."
-            required
-            style="padding:10px; resize:vertical;"
-          ></textarea>
-        </div>
+      <form class="form" id="review-form">
+        <label class="form-label" for="comment">Comment</label>
+        <textarea
+          class="form-input"
+          id="comment"
+          name="comment"
+          rows="5"
+          placeholder="Write your review..."
+          required
+          style="resize: vertical;"
+        ></textarea>
 
-        <div style="display:flex; flex-direction:column; gap:6px; max-width:220px;">
-          <label for="rating">Rating</label>
-          <select
-            id="rating"
-            name="rating"
-            required
-            style="padding:10px;"
-          >
-            <option value="" selected disabled>Select rating</option>
-            <option value="1">1 - Poor</option>
-            <option value="2">2 - Fair</option>
-            <option value="3">3 - Good</option>
-            <option value="4">4 - Very Good</option>
-            <option value="5">5 - Excellent</option>
-          </select>
-        </div>
+        <label class="form-label" for="rating">Rating</label>
+        <select
+          class="form-input"
+          id="rating"
+          name="rating"
+          required
+          style="max-width: 220px;"
+        >
+          <option value="" selected disabled>Select rating</option>
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Fair</option>
+          <option value="3">3 - Good</option>
+          <option value="4">4 - Very Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
 
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button
-            type="submit"
-            style="padding:10px 14px; cursor:pointer;"
-          >
-            Submit Review
-          </button>
-
-          <a href="index.html" style="text-decoration:none;">Cancel</a>
-        </div>
+        <button class="primary-button" type="submit">Submit Review</button>
       </form>
-    </main>
+    </section>
+  </main>
 
-    <!-- ✅ ربط سكربت إضافة المراجعة -->
-    <script type="module" src="./scripts/add_review.js"></script>
-  </body>
+  <footer class="site-footer">
+    <p>All rights reserved.</p>
+  </footer>
+
+  <script type="module" src="scripts/add_review.js"></script>
+</body>
 </html>
