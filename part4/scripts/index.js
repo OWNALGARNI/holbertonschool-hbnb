@@ -1,13 +1,49 @@
 import { API_BASE } from "./config.js";
+import { getToken, getCookie, logout } from "./auth.js";
 
 const placesContainer = document.getElementById("places-list");
-const countrySelect = document.getElementById("country-filter");
+const priceFilter = document.getElementById("price-filter");
+const loginButton = document.getElementById("header-login");
 
 let allPlaces = [];
 
+/**
+ * Check user authentication and update login button
+ */
+function checkAuthentication() {
+  const token = getToken();
+  
+  if (token) {
+    // User is authenticated - change button to Logout
+    loginButton.textContent = "Logout";
+    loginButton.href = "#";
+    loginButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      logout("index.html");
+    });
+  } else {
+    // User is not authenticated - show Login
+    loginButton.textContent = "Login";
+    loginButton.href = "login.html";
+  }
+}
+
+/**
+ * Fetch places from API with authentication token if available
+ */
 async function fetchPlaces() {
   try {
-    const res = await fetch(`${API_BASE}/places`);
+    const token = getToken();
+    const headers = {
+      "Content-Type": "application/json"
+    };
+    
+    // Include token in Authorization header if available
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(`${API_BASE}/places`, { headers });
 
     const data = await res.json().catch(() => []);
     if (!res.ok) {
@@ -16,43 +52,22 @@ async function fetchPlaces() {
     }
 
     allPlaces = Array.isArray(data) ? data : [];
-    fillCountries(allPlaces);
     renderPlaces(allPlaces);
   } catch (err) {
     console.error("Network error fetching places:", err);
   }
 }
 
-function getCountryName(place) {
-  // نستخدم حقل country من API
-  return place.country || "Unknown";
-}
-
-function fillCountries(places) {
-  const countries = new Set();
-  places.forEach((p) => countries.add(getCountryName(p)));
-
-  const sorted = Array.from(countries).sort((a, b) =>
-    a.localeCompare(b, "en", { sensitivity: "base" })
-  );
-
-  // نظّف الخيارات القديمة (واترك All)
-  countrySelect.innerHTML = `<option value="all">All</option>`;
-
-  sorted.forEach((c) => {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    countrySelect.appendChild(opt);
-  });
-}
-
+/**
+ * Render places list
+ */
 function renderPlaces(places) {
   placesContainer.innerHTML = "";
 
   places.forEach((place) => {
     const card = document.createElement("article");
     card.classList.add("place-card");
+    card.dataset.price = place.price || 0;
 
     const price = place.price ?? "—";
     const title = place.title ?? "Unnamed place";
@@ -66,22 +81,37 @@ function renderPlaces(places) {
     placesContainer.appendChild(card);
   });
 
-  // لو ما فيه نتائج بعد الفلترة
   if (places.length === 0) {
     placesContainer.innerHTML = `<p class="form-message" style="color:#6b7280;">No places found.</p>`;
   }
 }
 
-countrySelect.addEventListener("change", () => {
-  const selected = countrySelect.value;
+/**
+ * Filter places by price without reloading the page
+ */
+function filterPlacesByPrice() {
+  const selectedPrice = priceFilter.value;
+  const placeCards = document.querySelectorAll(".place-card");
 
-  if (selected === "all") {
-    renderPlaces(allPlaces);
-    return;
-  }
+  placeCards.forEach((card) => {
+    const cardPrice = parseFloat(card.dataset.price) || 0;
 
-  const filtered = allPlaces.filter((p) => getCountryName(p) === selected);
-  renderPlaces(filtered);
-});
+    if (selectedPrice === "all") {
+      card.style.display = "";
+    } else {
+      const maxPrice = parseFloat(selectedPrice);
+      if (cardPrice <= maxPrice) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    }
+  });
+}
 
+// Event listener for price filter
+priceFilter.addEventListener("change", filterPlacesByPrice);
+
+// Initialize page
+checkAuthentication();
 fetchPlaces();
