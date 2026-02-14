@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBnB | Login</title>
+  <link rel="icon" href="images/icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a href="index.html" class="logo-link">
+      <img src="images/logo.png" alt="HBnB logo" class="logo" />
+    </a>
+
+    <nav class="nav">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="login.html" class="nav-link">Login</a>
+    </nav>
+
+    <a href="login.html" class="login-button">Login</a>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h1 class="page-title">Login</h1>
+
+      <form class="form" id="login-form" novalidate>
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" type="email" id="email" name="email" required />
+
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" name="password" required minlength="6" />
+
+        <button class="primary-button" type="submit">Sign in</button>
+
+        <p class="form-message" id="login-message" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>All rights reserved.</p>
+  </footer>
+</body>
+</html>
