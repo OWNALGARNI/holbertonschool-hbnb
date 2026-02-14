@@ -17,5 +17,11 @@ class BaseModel(db.Model):
     )
 
     def to_dict(self):
-        data = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        data = {}
+        for c in self.__table__.columns:
+            value = getattr(self, c.name)
+            # Convert datetime to ISO format string
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            data[c.name] = value
         return data
