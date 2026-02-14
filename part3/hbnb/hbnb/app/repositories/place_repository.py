@@ -1,5 +1,5 @@
-from part3.repositories.base_repository import BaseRepository
-from part3.models.place import Place
+from app.repositories.sqlalchemy_repository import SQLAlchemyRepository
+from app.models.place import Place
 
 
 class PlaceRepository(BaseRepository):

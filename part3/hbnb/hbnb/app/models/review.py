@@ -1,5 +1,5 @@
-from part3 import db
-from part3.models.base_model import BaseModel
+from app.extensions import db
+from app.models.base_model import BaseModel
 from sqlalchemy import ForeignKey
 
 
