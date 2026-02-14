@@ -1,7 +1,7 @@
 import re
 from typing import Any, Dict, Optional
 
-from app.models.base_model import BaseModel
+from .base_model import BaseModel
 
 
 class User(BaseModel):

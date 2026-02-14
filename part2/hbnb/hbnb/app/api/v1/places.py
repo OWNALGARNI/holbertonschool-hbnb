@@ -22,7 +22,7 @@ Dependencies:
     - flask_restx
     - app.services.facade: Business logic layer for place operations.
 """
-from app.services import facade
+from ...services import facade
 from flask_restx import Namespace, Resource, fields
 
 api = Namespace('places', description='Place operations')
@@ -50,6 +50,15 @@ review_model = api.model('PlaceReview', {
 # Define the place model for input validation and documentation
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Title of the place'),
+    'description': fields.String(description='Description of the place'),
+    'price': fields.Float(required=True, description='Price per night'),
+    'latitude': fields.Float(required=True, description='Latitude of the place'),
+    'longitude': fields.Float(required=True, description='Longitude of the place'),
+    'owner_id': fields.String(required=True, description='ID of the owner'),
+    'owner': fields.Nested(user_model, description='Owner of the place'),
+    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
+    'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
+})
 
 api_owner_model = api.model('Owner', {
     'id': fields.String,
@@ -57,31 +66,16 @@ api_owner_model = api.model('Owner', {
     'last_name': fields.String,
     'email': fields.String,
 })
+
 api_amenity_model = api.model('AmenityDetail', {
     'id': fields.String,
     'name': fields.String,
     'description': fields.String,
 })
+
 place_detail_model = api.inherit('PlaceDetail', place_model, {
     'owner': fields.Nested(api_owner_model),
     'amenities': fields.List(fields.Nested(api_amenity_model)),
-})
-    'description': fields.String(description='Description of the place'),
-    'price': fields.Float(required=True, description='Price per night'),
-    'latitude': fields.Float(
-        required=True, description='Latitude of the place'
-        ),
-    'longitude': fields.Float(
-        required=True, description='Longitude of the place'
-        ),
-    'owner_id': fields.String(required=True, description='ID of the owner'),
-    'owner': fields.Nested(user_model, description='Owner of the place'),
-    'amenities': fields.List(
-        fields.Nested(amenity_model), description='List of amenities'
-        ),
-    'reviews': fields.List(
-        fields.Nested(review_model), description='List of reviews'
-        )
 })
 
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from app.persistence.repository import InMemoryRepository
-from app.models.review import Review
-from app.models.place import Place
-from app.models.user import User
+from ..persistence.repository import InMemoryRepository
+from ..models.review import Review
+from ..models.place import Place
+from ..models.user import User
 
 
 class HBnBFacade:
@@ -88,7 +88,7 @@ class HBnBFacade:
     # ---------- Amenities ----------
     def create_amenity(self, data: dict):
         """Create a new amenity"""
-        from app.models.amenity import Amenity
+        from ..models.amenity import Amenity
         amenity = Amenity(**data)
         self.amenities_repo.add(amenity)
         return amenity

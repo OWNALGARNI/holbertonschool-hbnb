@@ -1,5 +1,5 @@
 from flask_restx import Api
-from app.api.v1 import namespaces
+from .v1 import namespaces
 
 api = Api(
     title="HBnB API",
