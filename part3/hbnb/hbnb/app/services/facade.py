@@ -15,7 +15,10 @@ class HBnBFacade:
 
     # ---------- Users ----------
     def create_user(self, data: dict) -> User:
+        # Hash password before creating user
         user = User(**data)
+        if 'password' in data:
+            user.hash_password(data['password'])
         self.users_repo.add(user)
         return user
 
