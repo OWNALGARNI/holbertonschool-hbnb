@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 import uuid
 from datetime import datetime
-from app.persistence.repository import InMemoryRepository
+from app.repositories.sqlalchemy_repository import SQLAlchemyRepository
 from app.models.review import Review
 from app.models.place import Place
 from app.models.user import User
+from app.models.amenity import Amenity
 
 
 class HBnBFacade:
     def __init__(self) -> None:
-        # Repository منفصل لكل كيان
-        self.users_repo = InMemoryRepository()
-        self.places_repo = InMemoryRepository()
-        self.reviews_repo = InMemoryRepository()
-        self.amenities_repo = InMemoryRepository()
+        # استخدام SQLAlchemy بدلاً من InMemory
+        self.users_repo = SQLAlchemyRepository(User)
+        self.places_repo = SQLAlchemyRepository(Place)
+        self.reviews_repo = SQLAlchemyRepository(Review)
+        self.amenities_repo = SQLAlchemyRepository(Amenity)
 
     # ---------- Users ----------
     def create_user(self, data: dict) -> User:
@@ -32,13 +33,11 @@ class HBnBFacade:
 
     def get_user_by_email(self, email: str) -> User | None:
         """Get user by email address"""
-        for user in self.users_repo.get_all():
-            if user.email == email.lower().strip():
-                return user
-        return None
+        users = self.users_repo.list(email=email.lower().strip())
+        return users[0] if users else None
 
     def get_all_users(self):
-        return self.users_repo.get_all()
+        return self.users_repo.list()
 
     def update_user(self, user_id: str, data: dict) -> User | None:
         """Update user data"""
@@ -61,7 +60,7 @@ class HBnBFacade:
         return self.places_repo.get(place_id)
 
     def get_all_places(self):
-        return self.places_repo.get_all()
+        return self.places_repo.list()
 
     def update_place(self, place_id: str, data: dict) -> Place | None:
         """Update place data"""

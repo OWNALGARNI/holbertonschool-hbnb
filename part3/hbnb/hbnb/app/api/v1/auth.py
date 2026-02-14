@@ -38,8 +38,16 @@ class Login(Resource):
         email = credentials['email']
         password = credentials['password']
         
+        # Debug logging
+        print(f"🔍 Login attempt: email='{email}', password='{password}'")
+        
         # Get user by email
         user = facade.get_user_by_email(email)
+        
+        print(f"🔍 User found: {user is not None}")
+        if user:
+            print(f"🔍 User email: '{user.email}'")
+            print(f"🔍 Password verification: {user.verify_password(password)}")
         
         if not user:
             return {'error': 'Invalid credentials'}, 401
