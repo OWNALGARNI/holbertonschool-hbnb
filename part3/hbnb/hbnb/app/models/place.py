@@ -32,3 +32,29 @@ class Place(BaseModel):
         secondary=place_amenity,
         back_populates="places"
     )
+
+    def to_dict(self):
+        """Override to_dict to include amenities and reviews"""
+        data = super().to_dict()
+        
+        # Add amenities (just id and name)
+        data['amenities'] = [
+            {'id': amenity.id, 'name': amenity.name}
+            for amenity in self.amenities
+        ]
+        
+        # Add reviews (with user info)
+        data['reviews'] = []
+        for review in self.reviews:
+            review_data = review.to_dict()
+            # Add user info if available
+            if review.user:
+                review_data['user'] = {
+                    'id': review.user.id,
+                    'first_name': review.user.first_name,
+                    'last_name': review.user.last_name,
+                    'email': review.user.email
+                }
+            data['reviews'].append(review_data)
+        
+        return data

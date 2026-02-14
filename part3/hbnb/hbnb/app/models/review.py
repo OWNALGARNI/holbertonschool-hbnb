@@ -1,6 +1,7 @@
 from app.extensions import db
 from app.models.base_model import BaseModel
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class Review(BaseModel):
@@ -20,3 +21,6 @@ class Review(BaseModel):
         ForeignKey("users.id"),
         nullable=False
     )
+
+    # Relationship to access user data
+    user = relationship("User", backref="user_reviews", foreign_keys=[user_id])
