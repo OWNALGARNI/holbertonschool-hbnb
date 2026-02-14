@@ -13,6 +13,7 @@ class Place(BaseModel):
     price = db.Column(db.Integer, nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    country = db.Column(db.String(100))
 
     owner_id = db.Column(
         db.String(60),

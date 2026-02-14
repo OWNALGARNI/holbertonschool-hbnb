@@ -1,7 +1,4 @@
 import { API_BASE } from "./config.js";
-import { getToken, requireAuth } from "./auth.js";
-
-requireAuth("login.html");
 
 const placesContainer = document.getElementById("places-list");
 const countrySelect = document.getElementById("country-filter");
@@ -10,11 +7,7 @@ let allPlaces = [];
 
 async function fetchPlaces() {
   try {
-    const res = await fetch(`${API_BASE}/places`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
+    const res = await fetch(`${API_BASE}/places`);
 
     const data = await res.json().catch(() => []);
     if (!res.ok) {
@@ -31,14 +24,8 @@ async function fetchPlaces() {
 }
 
 function getCountryName(place) {
-  // حاول تغطي أكثر من شكل يرجع من API
-  return (
-    place.country_name ||
-    place.country ||
-    (place.city && place.city.country_name) ||
-    (place.city && place.city.country) ||
-    "Unknown"
-  );
+  // نستخدم حقل country من API
+  return place.country || "Unknown";
 }
 
 function fillCountries(places) {
@@ -67,10 +54,11 @@ function renderPlaces(places) {
     const card = document.createElement("article");
     card.classList.add("place-card");
 
-    const price = place.price_per_night ?? place.price ?? "—";
+    const price = place.price ?? "—";
+    const title = place.title ?? "Unnamed place";
 
     card.innerHTML = `
-      <h2 class="place-title">${place.name ?? "Unnamed place"}</h2>
+      <h2 class="place-title">${title}</h2>
       <p class="place-price">$${price} / night</p>
       <a class="details-button" href="place.html?id=${place.id}">View Details</a>
     `;
