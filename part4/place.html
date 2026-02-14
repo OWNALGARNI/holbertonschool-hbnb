@@ -7,6 +7,7 @@
   <link rel="icon" href="images/icon.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header class="site-header">
     <a href="index.html" class="logo-link">
@@ -28,6 +29,7 @@
       <div class="place-info">
         <p><strong>Host:</strong> <span id="place-host">—</span></p>
         <p><strong>Price:</strong> <span id="place-price">—</span></p>
+
         <p><strong>Description:</strong></p>
         <p id="place-description">—</p>
 
@@ -46,10 +48,7 @@
       <h2 class="section-title">Reviews</h2>
 
       <div class="grid" id="reviews-list">
-        <article class="review-card">
-          <p class="review-comment">Sample review comment…</p>
-          <p class="review-meta">by <span>Sample User</span> — ⭐ <span>5</span></p>
-        </article>
+        <!-- reviews injected by JS -->
       </div>
     </section>
   </main>
@@ -57,5 +56,8 @@
   <footer class="site-footer">
     <p>All rights reserved.</p>
   </footer>
+
+  <!-- ✅ script at end of body -->
+  <script type="module" src="scripts/place.js"></script>
 </body>
 </html>

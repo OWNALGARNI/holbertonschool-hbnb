@@ -57,13 +57,13 @@ function renderReviews(reviews) {
     const card = document.createElement("article");
     card.classList.add("review-card");
 
-    const username =
-      (r.user && (r.user.first_name || r.user.name || r.user.email)) ||
-      r.user_name ||
+    const username = 
+      (r.user && `${r.user.first_name || ""} ${r.user.last_name || ""}`.trim()) ||
+      (r.user && r.user.email) ||
       "Anonymous";
 
     const rating = r.rating ?? "—";
-    const comment = r.comment ?? r.text ?? "—";
+    const comment = r.text ?? r.comment ?? "—";
 
     card.innerHTML = `
       <p class="review-comment">${comment}</p>
@@ -98,15 +98,16 @@ async function loadPlace() {
     return;
   }
 
-  placeNameEl.textContent = place.name ?? "Unnamed place";
-  priceEl.textContent = `$${place.price_per_night ?? place.price ?? "—"} / night`;
+  placeNameEl.textContent = place.title ?? "Unnamed place";
+  priceEl.textContent = `$${place.price ?? "—"} / night`;
   descEl.textContent = place.description ?? "—";
 
   // host
-  const host =
-    (place.host && (place.host.first_name || place.host.name || place.host.email)) ||
-    place.host_name ||
-    "—";
+  const ownerFirstName = place.first_name || (place.owner && place.owner.first_name) || "";
+  const ownerLastName = place.last_name || (place.owner && place.owner.last_name) || "";
+  const host = ownerFirstName && ownerLastName 
+    ? `${ownerFirstName} ${ownerLastName}` 
+    : (place.owner && place.owner.email) || "—";
   hostEl.textContent = host;
 
   // amenities

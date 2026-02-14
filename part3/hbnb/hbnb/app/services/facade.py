@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import uuid
+from datetime import datetime
 from app.persistence.repository import InMemoryRepository
 from app.models.review import Review
 from app.models.place import Place
@@ -17,6 +19,9 @@ class HBnBFacade:
     def create_user(self, data: dict) -> User:
         # Hash password before creating user
         user = User(**data)
+        user.id = str(uuid.uuid4())
+        user.created_at = datetime.utcnow()
+        user.updated_at = datetime.utcnow()
         if 'password' in data:
             user.hash_password(data['password'])
         self.users_repo.add(user)
@@ -46,6 +51,9 @@ class HBnBFacade:
     # ---------- Places ----------
     def create_place(self, data: dict) -> Place:
         place = Place(**data)
+        place.id = str(uuid.uuid4())
+        place.created_at = datetime.utcnow()
+        place.updated_at = datetime.utcnow()
         self.places_repo.add(place)
         return place
 
@@ -66,6 +74,9 @@ class HBnBFacade:
     # ---------- Reviews ----------
     def create_review(self, data: dict) -> Review:
         review = Review(**data)
+        review.id = str(uuid.uuid4())
+        review.created_at = datetime.utcnow()
+        review.updated_at = datetime.utcnow()
         self.reviews_repo.add(review)
         return review
 
