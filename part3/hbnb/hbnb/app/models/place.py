@@ -34,8 +34,17 @@ class Place(BaseModel):
     )
 
     def to_dict(self):
-        """Override to_dict to include amenities and reviews"""
+        """Override to_dict to include amenities, reviews, and owner info"""
         data = super().to_dict()
+        
+        # Add owner information
+        if hasattr(self, 'owner') and self.owner:
+            data['owner'] = {
+                'id': self.owner.id,
+                'first_name': self.owner.first_name,
+                'last_name': self.owner.last_name,
+                'email': self.owner.email
+            }
         
         # Add amenities (just id and name)
         data['amenities'] = [

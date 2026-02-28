@@ -24,3 +24,18 @@ class Review(BaseModel):
 
     # Relationship to access user data
     user = relationship("User", backref="user_reviews", foreign_keys=[user_id])
+
+    def to_dict(self):
+        """Override to_dict to include user information"""
+        data = super().to_dict()
+        
+        # Add user information
+        if hasattr(self, 'user') and self.user:
+            data['user'] = {
+                'id': self.user.id,
+                'first_name': self.user.first_name,
+                'last_name': self.user.last_name,
+                'email': self.user.email
+            }
+        
+        return data

@@ -29,7 +29,7 @@ class ReviewList(Resource):
     def post(self):
         """Create a new review
         
-        Requires JWT token. Users cannot review their own places or review the same place twice.
+        Requires JWT token. Users can review any place including their own.
         """
         current_user_id = get_jwt_identity()
         review_data = api.payload
@@ -46,15 +46,7 @@ class ReviewList(Resource):
         if not place:
             return {'error': 'Place not found'}, 404
         
-        # Check if user is trying to review their own place
-        if place.owner_id == current_user_id:
-            return {'error': 'You cannot review your own place'}, 403
-        
-        # Check if user has already reviewed this place
-        existing_reviews = facade.get_reviews_by_place(place_id)
-        for review in existing_reviews:
-            if review.user_id == current_user_id:
-                return {'error': 'You have already reviewed this place'}, 400
+        # Allow users to review any place including their own
         
         try:
             new_review = facade.create_review(review_data)
@@ -77,15 +69,7 @@ class ReviewList(Resource):
         Public endpoint - no authentication required.
         """
         reviews = facade.get_all_reviews()
-        return [{
-            'id': review.id,
-            'text': review.text,
-            'rating': review.rating,
-            'user_id': review.user_id,
-            'place_id': review.place_id,
-            'created_at': review.created_at.isoformat(),
-            'updated_at': review.updated_at.isoformat()
-        } for review in reviews], 200
+        return [review.to_dict() for review in reviews], 200
 
 
 @api.route('/<review_id>')
@@ -102,15 +86,7 @@ class ReviewResource(Resource):
         review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
-        return {
-            'id': review.id,
-            'text': review.text,
-            'rating': review.rating,
-            'user_id': review.user_id,
-            'place_id': review.place_id,
-            'created_at': review.created_at.isoformat(),
-            'updated_at': review.updated_at.isoformat()
-        }, 200
+        return review.to_dict(), 200
 
     @jwt_required()
     @api.expect(review_model)
@@ -196,12 +172,4 @@ class PlaceReviewList(Resource):
             return {'error': 'Place not found'}, 404
         
         reviews = facade.get_reviews_by_place(place_id)
-        return [{
-            'id': review.id,
-            'text': review.text,
-            'rating': review.rating,
-            'user_id': review.user_id,
-            'place_id': review.place_id,
-            "created_at": review.created_at.isoformat(),
-            "updated_at": review.updated_at.isoformat()
-        } for review in reviews], 200
+        return [review.to_dict() for review in reviews], 200

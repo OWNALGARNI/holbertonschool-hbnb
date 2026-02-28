@@ -106,7 +106,7 @@ async function loadPlace() {
 
   // جلب تفاصيل المكان
   const { res: placeRes, data: place } = await fetchJSON(
-    `${API_BASE}/places/${encodeURIComponent(placeId)}/`,
+    `${API_BASE}/places/${encodeURIComponent(placeId)}`,
     {
       headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
     }
@@ -114,9 +114,12 @@ async function loadPlace() {
 
   if (!placeRes.ok || !place) {
     placeNameEl.textContent = "Failed to load place details.";
+    console.error("Failed to load place:", placeRes.status, place);
     addReviewLink.style.display = "none";
     return;
   }
+
+  console.log("Place data:", place);
 
   placeNameEl.textContent = place.title ?? "Unnamed place";
   priceEl.textContent = `$${place.price ?? "—"} / night`;
@@ -136,9 +139,9 @@ async function loadPlace() {
   // reviews: أحيانًا ترجع داخل place، وأحيانًا endpoint مستقل
   let reviews = place.reviews;
 
-  if (!reviews) {
+  if (!reviews || !Array.isArray(reviews)) {
     const { res: revRes, data: revData } = await fetchJSON(
-      `${API_BASE}/places/${encodeURIComponent(placeId)}/reviews/`,
+      `${API_BASE}/reviews/places/${encodeURIComponent(placeId)}/reviews`,
       {
         headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
       }
